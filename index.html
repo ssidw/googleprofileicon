@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>idw · Profile Icon Maker</title>
+<script>try{var th=localStorage.getItem('idw-theme')||(matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light');document.documentElement.dataset.theme=th}catch(e){document.documentElement.dataset.theme='light'}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Yantramanav:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root,:root[data-theme=light]{color-scheme:light;--bg:#f4f4f6;--card:#fff;--text:#18181b;--muted:#75757d;--line:#e4e4e8;--chip:#efeff2;--accent:#2563eb;--c1:#e9e9ee;--c2:#fafafc}
+:root[data-theme=dark]{color-scheme:dark;--bg:#000;--card:#0f0f11;--text:#f2f2f5;--muted:#8a8a93;--line:#232327;--chip:#1b1b1f;--accent:#4f8cff;--c1:#1a1a1d;--c2:#0b0b0d}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:15px/1.4 system-ui,-apple-system,'Segoe UI',Roboto,sans-serif}
+.top{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;padding:14px 28px 0}
+.top .seg{margin-top:24px}
+.logo{position:relative;isolation:isolate;display:inline-flex;color:var(--text);text-decoration:none;font:700 clamp(64px,9vw,104px)/1 Arial,Helvetica,sans-serif;letter-spacing:-.03em;user-select:none;outline:none}
+.logo::before{content:"";position:absolute;inset:-12% -18%;z-index:-1;pointer-events:none;background:radial-gradient(closest-side,rgba(139,92,246,.38),rgba(79,140,255,.18) 55%,transparent);filter:blur(20px);opacity:0;transform:scale(.6);transition:opacity 1.1s ease,transform 1.4s cubic-bezier(.16,1,.3,1)}
+.logo span{display:inline-block;padding:.06em 0;color:var(--text);background:linear-gradient(90deg,var(--c) 40%,var(--text) 60%) 100% 0/200% 100%;-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;filter:drop-shadow(0 0 0 transparent);transition:transform 1.2s cubic-bezier(.16,1,.3,1),background-position 1.3s cubic-bezier(.65,0,.35,1),filter 1.1s ease;transition-delay:calc((2 - var(--i))*80ms)}
+.logo:hover::before,.logo:focus-visible::before{opacity:1;transform:scale(1)}
+.logo:hover span,.logo:focus-visible span{transform:translateY(-10px) scale(1.08);background-position:0 0;filter:drop-shadow(0 8px 14px var(--g));transition-delay:calc(var(--i)*110ms)}
+.logo:active span{transform:translateY(-4px) scale(.97)}
+
+.wrap{max-width:980px;margin:0 auto;padding:20px}
+.layout{display:grid;grid-template-columns:290px 1fr;gap:20px;align-items:start}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px}
+.preview{position:sticky;top:20px;text-align:center}
+.stage{border-radius:12px;padding:22px;margin-bottom:16px;background:repeating-conic-gradient(var(--c1) 0 25%,var(--c2) 0 50%) 0 0/18px 18px}
+canvas{width:100%;max-width:220px;aspect-ratio:1;display:block;margin:0 auto;filter:drop-shadow(0 8px 16px rgba(0,0,0,.3))}
+h2{margin:0 0 10px;font-size:.75rem;text-transform:uppercase;letter-spacing:.09em;color:var(--muted);font-weight:600}
+.stack{display:grid;gap:16px}
+.lbl{font-size:.8rem;color:var(--muted);margin:12px 0 6px}
+.grid{display:flex;flex-wrap:wrap;gap:8px}
+.scroll{max-height:130px;overflow-y:auto;padding:3px}
+.sw{width:32px;height:32px;border-radius:50%;border:0;padding:0;cursor:pointer;background:var(--chip);color:var(--text);font:600 .85rem inherit;display:flex;align-items:center;justify-content:center}
+.sw:hover{transform:scale(1.1)}
+.sw.sel{outline:2.5px solid var(--accent);outline-offset:2px}
+.sw.l.sel{background:var(--accent);color:#fff}
+.sw img{width:24px;height:24px;border-radius:50%}
+.row{display:flex;align-items:center;gap:10px;margin-top:10px;flex-wrap:wrap}
+.row>span:first-child{width:74px;color:var(--muted);font-size:.85rem}
+.row input[type=range]{flex:1;min-width:90px;accent-color:var(--accent)}
+.row label{display:flex;align-items:center;gap:6px;cursor:pointer}
+input[type=color]{width:36px;height:30px;border:1px solid var(--line);border-radius:7px;padding:2px;background:var(--chip);cursor:pointer}
+select,input[type=text],.btn2{background:var(--chip);color:var(--text);border:1px solid var(--line);border-radius:8px;padding:6px 10px;font:inherit;font-size:.85rem;cursor:pointer}
+input[type=text]{width:110px;cursor:text}
+.btn{width:100%;background:var(--accent);color:#fff;border:0;border-radius:10px;padding:.7rem;font:inherit;font-weight:600;cursor:pointer}
+.btn:hover{filter:brightness(1.1)}
+.seg{display:inline-flex;background:var(--chip);border-radius:8px;padding:3px}
+.seg button{border:0;background:none;color:var(--muted);font:inherit;font-size:.85rem;padding:4px 12px;border-radius:6px;cursor:pointer}
+.seg button.on{background:var(--card);color:var(--text);box-shadow:0 1px 3px rgba(0,0,0,.2)}
+.acts{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+.acts .btn2{text-align:center}
+.hint{font-size:.75rem;color:var(--muted);margin-top:8px}
+@media(max-width:760px){.layout{grid-template-columns:1fr}.preview{position:static}}
+</style>
+</head>
+<body>
+<header class="top"><a class="logo" href="https://github.com/ssidw" target="_blank" rel="noopener noreferrer" aria-label="idw on GitHub"><span style="--i:0;--c:#4f8cff;--g:rgba(79,140,255,.55)">i</span><span style="--i:1;--c:#8b5cf6;--g:rgba(139,92,246,.55)">d</span><span style="--i:2;--c:#ec4899;--g:rgba(236,72,153,.55)">w</span></a><div class="seg" id="theme"><button data-t="light">☀ Light</button><button data-t="dark">● Dark</button></div></header>
+<main class="wrap"><div class="layout">
+
+<aside class="card preview">
+  <div class="stage"><canvas id="cv" width="1000" height="1000"></canvas></div>
+  <button class="btn" id="dl">Download</button>
+  <div class="row" style="justify-content:center;margin-top:12px">
+    <select id="fmt"><option value="image/png">PNG</option><option value="image/jpeg">JPG</option><option value="image/webp">WebP</option></select>
+    <select id="exp"><option value="256">256 px</option><option value="512">512 px</option><option value="1000" selected>1000 px</option><option value="2048">2048 px</option></select>
+  </div>
+  <div class="acts">
+    <button class="btn2" id="rand">🎲 Random</button><button class="btn2" id="reset">↺ Reset</button>
+    <button class="btn2" id="cpimg">📋 Copy image</button><button class="btn2" id="cplink">🔗 Copy link</button>
+  </div>
+</aside>
+
+<section class="stack">
+  <div class="card">
+    <h2>Icon</h2>
+    <div class="grid" id="letters"></div>
+    <div class="row"><span>Text</span><input type="text" id="txt" maxlength="3" placeholder="A, İD, ★" autocomplete="off">
+      <label class="btn2">Upload photo<input type="file" id="file" accept="image/*" hidden></label></div>
+    <div class="lbl">Animals</div><div class="grid scroll" id="animals"></div>
+    <div class="hint">Shift / Ctrl / ⌘ + click adds more letters</div>
+  </div>
+
+  <div class="card">
+    <h2>Background</h2>
+    <div class="grid" id="colors"></div>
+    <div class="row"><span>Custom</span><input type="color" id="cc"><label><input type="checkbox" id="tr"> Transparent</label></div>
+    <div class="lbl">Gradients</div><div class="grid scroll" id="grads" style="max-height:150px"></div>
+    <div class="row"><span>Angle</span><input type="range" id="angle" min="0" max="360" step="5"><span id="angleV" style="width:40px"></span></div>
+    <div class="row"><span>Colors</span><input type="color" id="gc1"><input type="color" id="gc2"><button class="btn2" id="swap">⇄ Swap</button></div>
+  </div>
+
+  <div class="card">
+    <h2>Style</h2>
+    <div class="row" style="margin-top:0"><span>Shape</span><div class="seg" id="shapes"><button data-s="circle">Circle</button><button data-s="round">Rounded</button><button data-s="square">Square</button></div></div>
+    <div class="row"><span>Font</span><select id="font"></select><label><input type="checkbox" id="bold"> Bold</label><label><input type="checkbox" id="sh"> Shadow</label></div>
+    <div class="row"><span>Color</span><input type="color" id="tc"></div>
+    <div class="row"><span>Size</span><input type="range" id="ts" min="40" max="160" step="5"></div>
+    <div class="row"><span>Move</span><input type="range" id="oy" min="-30" max="30" step="1"></div>
+    <div class="row"><span>Pattern</span><select id="pat"><option>none</option><option>dots</option><option>stripes</option><option>grid</option><option>rings</option></select></div>
+    <div class="row"><span>Grain</span><input type="range" id="grain" min="0" max="40" step="1"></div>
+    <div class="row"><span>Ring</span><input type="range" id="ring" min="0" max="40" step="1"></div>
+  </div>
+</section>
+
+</div></main>
+
+<script>
+(function(){
+const $=id=>document.getElementById(id), P=new URLSearchParams(location.search);
+const LET='ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+const COLORS='AA47BC 7A1FA2 78909C 465A65 EC407A C2175B 5C6BC0 0288D1 00579C 0098A6 00887A 004C3F 689F39 33691E 8C6E63 5D4038 7E57C2 512DA7 EF6C00 F5511E BF360C 212121 FBC02D E53935'.split(' ');
+const GRADS=('FF512F-DD2476 F7971E-FFD200 F09819-EDDE5D FC466B-3F5EFB 8E2DE2-4A00E0 5433FF-20BDFF-A5FECB 00C6FF-0072FF 2193B0-6DD5ED 11998E-38EF7D B3FFAB-12FFF7 FF9A9E-FECFEF FBC2EB-A6C1EE FF758C-FF7EB3 F953C6-B91D73 1D2B64-F8CDDA 0F2027-2C5364 232526-414345 654EA3-EAAFC8 FF0844-FFB199 43E97B-38F9D7 EE0979-FF6A00 FF5F6D-FFC371 E96443-904E95 614385-516395 4568DC-B06AB3 7F00FF-E100FF FC4A1A-F7B733 0575E6-021B79 74EBD5-ACB6E5 FF9966-FF5E62 56AB2F-A8E063 3A1C71-D76D77-FFAF7B 00F260-0575E6 DA22FF-9733EE 134E5E-71B280 C31432-240B36 F12711-F5AF19 4E54C8-8F94FB 1FA2FF-12D8FA-A6FFCB EC008C-FC6767 667EEA-764BA2 6A11CB-2575FC 12C2E9-C471ED-F64F59 0F0C29-302B63-24243E F857A6-FF5858 00B09B-96C93D 8360C3-2EBF91 2C3E50-4CA1AF FDFC47-24FE41 FF00CC-333399 7474BF-348AC7 000000-434343 FFD89B-19547B D4145A-FBB03B').split(' ').map(s=>s.split('-'));
+const AN={Alligator:'🐊',Anteater:'🐾',Armadillo:'🦔',Auroch:'🐂',Axolotl:'🦎',Badger:'🦡',Bat:'🦇',Beaver:'🦫',Buffalo:'🐃',Camel:'🐫',Capybara:'🐹',Chameleon:'🦎',Cheetah:'🐆',Chinchilla:'🐭',Chipmunk:'🐿️',Chupacabra:'👹',Cormorant:'🐦',Coyote:'🐺',Crow:'🐦‍⬛',Dingo:'🐕',Dinosaur:'🦖',Dolphin:'🐬',Duck:'🦆',Elephant:'🐘',Ferret:'🐀',Fox:'🦊',Frog:'🐸',Giraffe:'🦒',Gopher:'🐹',Grizzly:'🐻',Hedgehog:'🦔',Hippo:'🦛',Hyena:'🐺',Ibex:'🐐',Ifrit:'🔥',Iguana:'🦎',Jackal:'🐺',Kangaroo:'🦘',Koala:'🐨',Kraken:'🐙',Lemur:'🐒',Leopard:'🐆',Liger:'🐯',Llama:'🦙',Manatee:'🐋',Mink:'🐾',Monkey:'🐵',Moose:'🦌',Narwhal:'🐳',Orangutan:'🦧',Otter:'🦦',Panda:'🐼',Penguin:'🐧',Platypus:'🦆',Pumpkin:'🎃',Python:'🐍',Quagga:'🦓',Rabbit:'🐰',Raccoon:'🦝',Rhino:'🦏',Sheep:'🐑',Shrew:'🐁',Skunk:'🦨',Squirrel:'🐿️',Tiger:'🐯',Turtle:'🐢',Walrus:'🦭',Wolf:'🐺',Wolverine:'🦡',Wombat:'🐻'};
+const FONTS={'Yantramanav':'"Yantramanav"','Arial':'Arial','Georgia':'Georgia','Times New Roman':'"Times New Roman"','Courier New':'"Courier New"','Trebuchet MS':'"Trebuchet MS"','Verdana':'Verdana','Impact':'Impact','Comic Sans MS':'"Comic Sans MS"'};
+const SHAPES=['circle','round','square'],PATS=['none','dots','stripes','grid','rings'],HEX=/^[0-9A-F]{6}$/;
+const EMOJI='"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif';
+const DEF={type:'letter',letters:['A'],animal:'',mode:'solid',color:COLORS[0],grad:GRADS[0],angle:135,tr:false,font:'Yantramanav',bold:false,tc:'FFFFFF',ts:100,oy:0,sh:false,shape:'circle',ring:0,pat:'none',grain:0};
+const clone=o=>JSON.parse(JSON.stringify(o)), clamp=(v,a,b)=>Math.min(b,Math.max(a,v));
+let S=clone(DEF), photo=null;
+try{const o=JSON.parse(P.get('s')||'{}');for(const k in DEF)if(k in o&&typeof o[k]===typeof DEF[k]&&Array.isArray(o[k])===Array.isArray(DEF[k]))S[k]=o[k]}catch(e){}
+S.letters=S.letters.map(String).slice(0,3);
+if(!HEX.test(S.color))S.color=DEF.color; if(!HEX.test(S.tc))S.tc=DEF.tc;
+if(!(S.grad.length>=2&&S.grad.length<=3&&S.grad.every(x=>HEX.test(x))))S.grad=DEF.grad;
+if(!FONTS[S.font])S.font=DEF.font; if(!SHAPES.includes(S.shape))S.shape='circle'; if(!PATS.includes(S.pat))S.pat='none';
+if(S.animal&&!AN[S.animal])S.animal=''; if(!['letter','animal'].includes(S.type)||(S.type==='animal'&&!S.animal))S.type='letter';
+S.ts=clamp(S.ts,40,160);S.oy=clamp(S.oy,-30,30);S.ring=clamp(S.ring,0,40);S.grain=clamp(S.grain,0,40);S.angle=clamp(S.angle,0,360);
+
+const cssG=(g,a)=>'linear-gradient('+a+'deg,'+g.map(c=>'#'+c).join(',')+')', same=(a,b)=>a.join()===b.join();
+
+function fillBg(c,s){
+  if(S.mode==='grad'){
+    const r=S.angle*Math.PI/180,dx=Math.sin(r),dy=-Math.cos(r),L=Math.abs(s*dx)+Math.abs(s*dy),m=s/2;
+    const g=c.createLinearGradient(m-dx*L/2,m-dy*L/2,m+dx*L/2,m+dy*L/2);
+    S.grad.forEach((col,i)=>g.addColorStop(i/(S.grad.length-1),'#'+col)); c.fillStyle=g;
+  } else c.fillStyle='#'+S.color;
+  c.fillRect(0,0,s,s);
+}
+function shapePath(c,s,i){
+  i=i||0; c.beginPath();
+  if(S.shape==='circle')c.arc(s/2,s/2,s/2-i,0,Math.PI*2);
+  else if(S.shape==='round'&&c.roundRect)c.roundRect(i,i,s-2*i,s-2*i,Math.max(0,s*.22-i));
+  else c.rect(i,i,s-2*i,s-2*i);
+}
+function pattern(c,s){
+  if(S.pat==='none')return;
+  c.save();c.strokeStyle=c.fillStyle='rgba(255,255,255,.22)';c.lineWidth=s*.006;const g=s/12;c.beginPath();
+  if(S.pat==='dots'){for(let x=g/2;x<s;x+=g)for(let y=g/2;y<s;y+=g){c.moveTo(x+s*.01,y);c.arc(x,y,s*.01,0,7)}c.fill()}
+  else if(S.pat==='grid'){for(let i=g;i<s;i+=g){c.moveTo(i,0);c.lineTo(i,s);c.moveTo(0,i);c.lineTo(s,i)}c.stroke()}
+  else if(S.pat==='stripes'){c.lineWidth=s*.025;for(let i=-s;i<s*2;i+=g*1.5){c.moveTo(i,s);c.lineTo(i+s,0)}c.stroke()}
+  else{for(let r=s*.1;r<s*.75;r+=s*.1){c.moveTo(s/2+r,s/2);c.arc(s/2,s/2,r,0,7)}c.stroke()}
+  c.restore();
+}
+function grain(c,s){
+  if(!S.grain)return;
+  const im=c.getImageData(0,0,s,s),d=im.data,k=S.grain*2.5;
+  for(let i=0;i<d.length;i+=4)if(d[i+3]){const n=(Math.random()-.5)*k;d[i]+=n;d[i+1]+=n;d[i+2]+=n}
+  c.putImageData(im,0,0);
+}
+function paint(c,s,done){
+  c.clearRect(0,0,s,s);c.save();shapePath(c,s);c.clip();
+  if(!S.tr)fillBg(c,s); pattern(c,s); grain(c,s);
+  c.textAlign='center';c.textBaseline='middle';
+  const oy=s*S.oy/100;
+  const shadow=()=>{if(S.sh){c.shadowColor='rgba(0,0,0,.4)';c.shadowBlur=s*.03;c.shadowOffsetY=s*.012}};
+  const fin=()=>{c.restore();
+    if(S.ring>0){const lw=S.ring*s/500;c.strokeStyle='#'+S.tc;c.lineWidth=lw;shapePath(c,s,lw/2);c.stroke()}
+    done&&done()};
+  const img=new Image();
+  if(S.type==='photo'&&photo){
+    const k=Math.max(s/photo.width,s/photo.height)*S.ts/100,w=photo.width*k,h=photo.height*k;
+    c.drawImage(photo,(s-w)/2,(s-h)/2+oy,w,h);fin();
+  } else if(S.type==='animal'&&S.animal){
+    const sz=Math.floor(s*.7*S.ts/100),off=Math.floor((s-sz)/2);
+    img.onload=()=>{shadow();c.drawImage(img,off,off+oy,sz,sz);fin()};
+    img.onerror=()=>{shadow();c.font=Math.floor(sz*.75)+'px '+EMOJI;c.fillText(AN[S.animal],s/2,s/2+s*.03+oy);fin()};
+    img.src='/animal-icons/'+S.animal+'.png';
+  } else {
+    const txt=S.letters.join(''),n=txt.length;
+    if(n){
+      const fs=Math.floor(s*(n===1?.55:n===2?.42:.32)*S.ts/100);
+      c.fillStyle='#'+S.tc;c.font=(S.bold?'700 ':'400 ')+fs+'px '+FONTS[S.font]+',Arial,sans-serif';
+      const m=c.measureText(txt);shadow();
+      c.fillText(txt,s/2,s/2+(m.actualBoundingBoxAscent-m.actualBoundingBoxDescent)/2+oy);
+    }
+    fin();
+  }
+}
+const cv=$('cv'),ctx=cv.getContext('2d');let token=0;
+function draw(){
+  const t=++token,off=document.createElement('canvas');off.width=off.height=1000;
+  paint(off.getContext('2d'),1000,()=>{if(t===token){ctx.clearRect(0,0,1000,1000);ctx.drawImage(off,0,0)}});
+}
+function sw(p,cls,bg,sel,title,fn,html){
+  const b=document.createElement('button');b.className='sw '+cls+(sel?' sel':'');b.title=title;
+  if(bg)b.style.background=bg; if(html!==undefined)b.innerHTML=html; b.onclick=fn; p.appendChild(b); return b;
+}
+function build(){
+  const L=$('letters');L.innerHTML='';
+  LET.forEach(l=>sw(L,'l',null,S.type==='letter'&&S.letters.includes(l),l,e=>{
+    S.letters=(e.shiftKey||e.ctrlKey||e.metaKey)?[...S.letters,l].slice(-3):[l];S.type='letter';refresh()},l));
+  const A=$('animals');A.innerHTML='';
+  Object.keys(AN).forEach(a=>{
+    const b=sw(A,'',null,S.type==='animal'&&S.animal===a,a,()=>{S.animal=a;S.type='animal';refresh()},'<img src="/animal-icons/small/'+a+'.png" alt="">');
+    b.firstChild.onerror=()=>{b.textContent=AN[a]};
+  });
+  const C=$('colors');C.innerHTML='';
+  COLORS.forEach(c=>sw(C,'','#'+c,S.mode==='solid'&&S.color===c,'#'+c,()=>{S.color=c;S.mode='solid';S.tr=false;refresh()}));
+  const G=$('grads');G.innerHTML='';
+  GRADS.forEach(g=>sw(G,'',cssG(g,135),S.mode==='grad'&&same(S.grad,g),g.map(x=>'#'+x).join(' → '),()=>{S.grad=g;S.mode='grad';S.tr=false;refresh()}));
+}
+function sync(){
+  if(document.activeElement!==$('txt'))$('txt').value=S.letters.join('');
+  $('cc').value='#'+S.color;$('gc1').value='#'+S.grad[0];$('gc2').value='#'+S.grad[S.grad.length-1];
+  $('angle').value=S.angle;$('angleV').textContent=S.angle+'°';$('tr').checked=S.tr;
+  $('font').value=S.font;$('bold').checked=S.bold;$('sh').checked=S.sh;$('tc').value='#'+S.tc;
+  $('ts').value=S.ts;$('oy').value=S.oy;$('pat').value=S.pat;$('grain').value=S.grain;$('ring').value=S.ring;
+  $('shapes').querySelectorAll('button').forEach(b=>b.classList.toggle('on',b.dataset.s===S.shape));
+}
+function url(){const u=new URL(location);u.searchParams.set('s',JSON.stringify(S));try{history.replaceState({},'',u)}catch(e){}}
+function light(){sync();draw();url()}
+function refresh(){build();light()}
+
+$('font').innerHTML=Object.keys(FONTS).map(f=>'<option>'+f+'</option>').join('');
+const val=e=>e.target.value, hex=e=>e.target.value.slice(1).toUpperCase();
+$('txt').oninput=e=>{S.letters=Array.from(val(e).toUpperCase()).slice(0,3);S.type='letter';build();light()};
+$('file').onchange=e=>{const f=e.target.files[0];if(!f)return;const i=new Image();i.onload=()=>{photo=i;S.type='photo';refresh()};i.src=URL.createObjectURL(f);e.target.value=''};
+$('cc').oninput=e=>{S.color=hex(e);S.mode='solid';S.tr=false;refresh()};
+$('tr').onchange=e=>{S.tr=e.target.checked;light()};
+const cg=()=>{S.grad=[$('gc1').value.slice(1).toUpperCase(),$('gc2').value.slice(1).toUpperCase()];S.mode='grad';S.tr=false;refresh()};
+$('gc1').oninput=cg;$('gc2').oninput=cg;
+$('swap').onclick=()=>{S.grad=[...S.grad].reverse();S.mode='grad';S.tr=false;refresh()};
+$('angle').oninput=e=>{S.angle=+val(e);S.mode='grad';S.tr=false;refresh()};
+$('shapes').onclick=e=>{if(e.target.dataset.s){S.shape=e.target.dataset.s;light()}};
+$('font').onchange=e=>{S.font=val(e);light()};
+$('bold').onchange=e=>{S.bold=e.target.checked;light()};
+$('sh').onchange=e=>{S.sh=e.target.checked;light()};
+$('tc').oninput=e=>{S.tc=hex(e);light()};
+$('pat').onchange=e=>{S.pat=val(e);light()};
+['ts','oy','grain','ring'].forEach(k=>$(k).oninput=e=>{S[k]=+val(e);light()});
+
+function flash(id,msg){const b=$(id),o=b.dataset.o||(b.dataset.o=b.textContent);b.textContent=msg;setTimeout(()=>b.textContent=o,1400)}
+function render(n,cb){const off=document.createElement('canvas');off.width=off.height=n;paint(off.getContext('2d'),n,()=>cb(off))}
+const name=()=>S.type==='animal'?S.animal:S.type==='photo'?'photo':(S.letters.join('')||'icon');
+$('dl').onclick=()=>render(+$('exp').value,off=>{
+  const f=$('fmt').value;let o=off;
+  if(f!=='image/png'){o=document.createElement('canvas');o.width=o.height=off.width;const x=o.getContext('2d');x.fillStyle='#fff';x.fillRect(0,0,o.width,o.width);x.drawImage(off,0,0)}
+  o.toBlob(b=>{const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='idw-'+name()+'.'+f.split('/')[1];a.click();setTimeout(()=>URL.revokeObjectURL(a.href),2000)},f,.95);
+});
+$('cpimg').onclick=()=>render(1000,off=>off.toBlob(b=>{
+  try{navigator.clipboard.write([new ClipboardItem({'image/png':b})]).then(()=>flash('cpimg','✓ Copied'),()=>flash('cpimg','Not allowed'))}catch(e){flash('cpimg','Not supported')}
+}));
+$('cplink').onclick=()=>{(navigator.clipboard?navigator.clipboard.writeText(location.href):Promise.reject()).then(()=>flash('cplink','✓ Copied'),()=>prompt('Copy this link:',location.href))};
+$('reset').onclick=()=>{S=clone(DEF);photo=null;refresh()};
+$('rand').onclick=()=>{
+  const r=a=>a[Math.random()*a.length|0];
+  S.type='letter';S.letters=[r(LET)];S.tr=false;
+  if(Math.random()<.65){S.grad=r(GRADS);S.angle=r([0,45,90,135,180,225,270,315]);S.mode='grad'}else{S.color=r(COLORS);S.mode='solid'}
+  S.pat=Math.random()<.3?r(PATS):'none';refresh();
+};
+function setTheme(th,save){
+  document.documentElement.dataset.theme=th;
+  if(save)try{localStorage.setItem('idw-theme',th)}catch(e){}
+  $('theme').querySelectorAll('button').forEach(b=>b.classList.toggle('on',b.dataset.t===th));
+}
+$('theme').onclick=e=>{if(e.target.dataset.t)setTheme(e.target.dataset.t,true)};
+setTheme(document.documentElement.dataset.theme||'light');
+refresh();
+if(document.fonts&&document.fonts.load)Promise.all([document.fonts.load('400 100px Yantramanav'),document.fonts.load('700 100px Yantramanav')]).then(draw,draw);
+})();
+</script>
+</body>
+</html>
